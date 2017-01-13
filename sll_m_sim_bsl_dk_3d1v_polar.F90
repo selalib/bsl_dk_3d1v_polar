@@ -915,11 +915,17 @@ contains
         loc4d_sz_x3, &
         loc4d_sz_x4 )
     
-    !print *,'#locsize it',iter,sim%my_rank,loc4d_sz_x1,loc4d_sz_x2,loc4d_sz_x3,loc4d_sz_x4
+      !print *,'#locsize it',iter,sim%my_rank,loc4d_sz_x1,loc4d_sz_x2,loc4d_sz_x3,loc4d_sz_x4
 
-   
-      
       call compute_rho_dk(sim)    
+      
+!      print *,'rho-iter',iter,sum(sim%rho3d_seqx1x2(1:sim%m_x1%num_cells,1:sim%m_x2%num_cells,1:sim%m_x3%num_cells)) &
+!           *sim%m_x1%delta_eta*sim%m_x2%delta_eta*sim%m_x3%delta_eta
+!      print *,'nx1,nx2,nx3',sim%m_x1%num_cells+1,sim%m_x2%num_cells+1,sim%m_x3%num_cells+1
+!      print *,'mass init',&
+!        sum(sim%rho3d_seqx1x2(1:sim%m_x1%num_cells,1:sim%m_x2%num_cells,1:sim%m_x3%num_cells)) &
+!        *sim%m_x1%delta_eta*sim%m_x2%delta_eta*sim%m_x3%delta_eta
+!      print *,sim%m_x1%delta_eta,sim%m_x2%delta_eta,sim%m_x3%delta_eta                 
 
       if(sll_f_get_collective_rank(sll_v_world_collective)==0) then
         print*,'#iteration=',iter
@@ -954,6 +960,9 @@ contains
           sim, &
           th_diag_id, &    
           iter-1)
+        print *,'iter',iter, &
+             sum(sim%rho3d_seqx1x2(1:sim%m_x1%num_cells,1:sim%m_x2%num_cells,1:sim%m_x3%num_cells)) &
+             *sim%m_x1%delta_eta*sim%m_x2%delta_eta*sim%m_x3%delta_eta
       endif            
 
 
@@ -1051,17 +1060,19 @@ contains
     sll_int32, intent(in) :: file_id
     sll_int32, intent(in) :: step
     sll_real64 :: dt
-    sll_int32 :: Nc_x1
-    sll_int32 :: Nc_x2
-    sll_int32 :: Nc_x3
-    sll_int32 :: Nc_x4
-    sll_real64 :: nrj
+    sll_int32 :: Nc_x1, i1
+    sll_int32 :: Nc_x2, i2
+    sll_int32 :: Nc_x3, i3
+    sll_int32 :: Nc_x4, i4
+    sll_real64 :: nrj, nrj2, mass, l2norm, x1_min, x1, tmp_f4d
     sll_real64 :: delta1
     sll_real64 :: delta2
     sll_real64 :: delta3
     sll_real64 :: delta4
     sll_int32 :: ierr
     dt = sim%dt
+
+    x1_min = sim%m_x1%eta_min
 
     Nc_x1 = sim%m_x1%num_cells
     Nc_x2 = sim%m_x2%num_cells
@@ -1073,9 +1084,6 @@ contains
     delta3 = sim%m_x3%delta_eta
     delta4 = sim%m_x4%delta_eta
 
-
-
-    nrj = 0._f64
     call sll_s_compute_reduction_2d_to_0d(&
       sim%phi3d_seqx1x2(:,:,1)**2, &
       nrj, &
@@ -1083,13 +1091,40 @@ contains
       Nc_x2+1, &
       delta1, &    
       delta2)
-    !nrj = sum(phi(this%geomx%nx/2,1:this%geomx%ny,1:this%geomv%nx)**2)*this%geomx%dy*this%geomv%dx
+    nrj = sum(sim%phi3d_seqx1x2(Nc_x1/2,1:Nc_x2,1:Nc_x3)**2)*delta2*delta3
 
+    mass = 0._f64 
+    nrj2 = 0._f64
+    l2norm=0._f64
+  
+    do i3=1,Nc_x3
+       do i2=1,Nc_x2
+          do i1=1,Nc_x1
+             x1 = x1_min+real(i1-1,f64)*delta1
+!             mass=mass+sim%rho3d_seqx1x2(i1,i2,i3)*x1
+             nrj2=nrj2+(sim%phi3d_seqx1x2(i1,i2,i3)**2)*x1
+             do i4=1,Nc_x4
+                tmp_f4d=sim%f4d_seqx1x2x4(i1,i2,i3,i4)
+                l2norm=l2norm+(tmp_f4d**2)*x1
+                mass=mass+tmp_f4d*x1
+             enddo
+          end do
+       end do
+    end do
+    mass=mass*delta1*delta2*delta3*delta4
+    nrj2=nrj2*delta1*delta2*delta3
+    l2norm=l2norm*delta1*delta2*delta3*delta4
 
     if(sll_f_get_collective_rank(sll_v_world_collective)==0) then
-      write(file_id,'(f12.5,2g20.12)') &
-        real(step,f64)*dt, &
-        nrj
+!      write(file_id,'(f12.5,2g20.12)') &
+!        real(step,f64)*dt, &
+       !        nrj
+       write(file_id,'(f12.5,4g20.12)') &
+         real(step,f64)*dt, &
+        nrj, &
+        mass, &
+        l2norm, &
+        nrj2
 
       if(step==0)then    
         ierr = 1
@@ -1543,12 +1578,13 @@ contains
 
 
     enddo
-    
+
     !we then change the normalization for n0_r
     tmp = 0.5_f64*(sim%n0_r(1)*x1_min+sim%n0_r(nc_x1+1)*x1_max)
     do i = 2,nc_x1
       x1 = x1_min+real(i-1,f64)*delta_x1
-      tmp = tmp + sim%n0_r(i)*x1
+      !      tmp = tmp + sim%n0_r(i)*x1
+      tmp = tmp + sim%n0_r(i)
     enddo
     tmp = tmp/real(nc_x1,f64)
     sim%n0_r = sim%n0_r/tmp
@@ -1675,7 +1711,7 @@ contains
     sll_real64, dimension(:), pointer :: x1_node,x2_node,x3_node,x4_node
     sll_real64 :: rpeak,k_x2,k_x3
     sll_real64 :: tmp_mode,tmp
-    sll_real64 :: x1_min,x1_max
+    sll_real64 :: x1_min,x1_max,mass
           
 
     !--> Initialization of the equilibrium distribution function
@@ -1714,7 +1750,10 @@ contains
     k_x3  = 2._f64*sll_p_pi/(sim%m_x3%eta_max - sim%m_x3%eta_min)
       
     rpeak = x1_min+sim%rho_peak*(x1_max-x1_min) 
-    
+
+    print *,'kx2',k_x2,k_x3,rpeak,sim%nmode,sim%mmode,sim%deltarn,sim%deltarTi,sim%eps_perturb
+
+    mass=0._f64
     do iloc4 = 1,loc4d_sz_x4
       do iloc3 = 1,loc4d_sz_x3
         do iloc2 = 1,loc4d_sz_x2
@@ -1729,11 +1768,13 @@ contains
                +real(sim%mmode,f64)*k_x2*x2_node(i2))
             tmp = exp(-(x1_node(i1)-rpeak)**2/(4._f64*sim%deltarn/sim%deltarTi))   
             f4d(iloc1,iloc2,iloc3,iloc4) = &
-              (1._f64+tmp_mode*sim%eps_perturb*tmp)*sim%feq_x1x4(i1,i4)            
+                 (1._f64+tmp_mode*sim%eps_perturb*tmp)*sim%feq_x1x4(i1,i4)
+            mass=mass+f4d(iloc1,iloc2,iloc3,iloc4)*x1_node(i1)
           end do
         end do
       end do
-    end do
+   end do
+   print *,'mass-routine init',mass
     SLL_DEALLOCATE(x1_node,ierr)
     SLL_DEALLOCATE(x2_node,ierr)
     SLL_DEALLOCATE(x3_node,ierr)
