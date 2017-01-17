@@ -156,6 +156,8 @@ module sll_m_sim_bsl_dk_3d1v_polar
     sll_o_xdmf_open, &
     sll_o_xdmf_write_array
 
+  use reductions
+
   implicit none
 
   public :: &
@@ -863,6 +865,7 @@ contains
     sll_real64 :: dt
     sll_int32 :: th_diag_id
     sll_int32 :: i_plot 
+    sll_real64 :: mass
     
     dt = sim%dt    
     
@@ -903,6 +906,7 @@ contains
 
     call initialize_fdistribu4d_DK(sim,sim%layout4d_seqx1x2x4,sim%f4d_seqx1x2x4)
 
+    call compute_mass(sim%layout4d_seqx1x2x4, sim%f4d_seqx1x2x4, mass)
 
     i_plot = 0
         

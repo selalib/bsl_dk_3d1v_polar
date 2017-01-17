@@ -3,7 +3,7 @@ SLL_DIR=/opt/selalib
 FC = h5pfc
 FFLAGS = -w -ffree-line-length-none -fall-intrinsics -O3 -fPIC -march=native
 FLIBS = -L${SLL_DIR}/lib -lselalib -lfftw3 -ldfftpack
-build: sll_m_sim_${SIM_NAME}.F90 ${SIM_NAME}.F90
+build: reductions.F90 sll_m_sim_${SIM_NAME}.F90 ${SIM_NAME}.F90 
 	${FC} ${FFLAGS} -o ${SIM_NAME} $^ -I${SLL_DIR}/include/selalib ${FLIBS}
 
 run: build
