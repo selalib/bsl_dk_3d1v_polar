@@ -906,7 +906,7 @@ contains
 
     call initialize_fdistribu4d_DK(sim,sim%layout4d_seqx1x2x4,sim%f4d_seqx1x2x4)
 
-    call compute_mass(sim%layout4d_seqx1x2x4, sim%f4d_seqx1x2x4, mass)
+!    call compute_mass(sim%layout4d_seqx1x2x4, sim%f4d_seqx1x2x4, mass)
 
     i_plot = 0
         
@@ -964,9 +964,9 @@ contains
           sim, &
           th_diag_id, &    
           iter-1)
-        print *,'iter',iter, &
-             sum(sim%rho3d_seqx1x2(1:sim%m_x1%num_cells,1:sim%m_x2%num_cells,1:sim%m_x3%num_cells)) &
-             *sim%m_x1%delta_eta*sim%m_x2%delta_eta*sim%m_x3%delta_eta
+!        print *,'iter',iter, &
+!             sum(sim%rho3d_seqx1x2(1:sim%m_x1%num_cells,1:sim%m_x2%num_cells,1:sim%m_x3%num_cells)) &
+!             *sim%m_x1%delta_eta*sim%m_x2%delta_eta*sim%m_x3%delta_eta
       endif            
 
 
@@ -1074,6 +1074,10 @@ contains
     sll_real64 :: delta3
     sll_real64 :: delta4
     sll_int32 :: ierr
+    sll_int32 :: prank
+
+    
+    prank = sll_f_get_collective_rank(sll_v_world_collective)
     dt = sim%dt
 
     x1_min = sim%m_x1%eta_min
@@ -1088,37 +1092,39 @@ contains
     delta3 = sim%m_x3%delta_eta
     delta4 = sim%m_x4%delta_eta
 
-    call sll_s_compute_reduction_2d_to_0d(&
-      sim%phi3d_seqx1x2(:,:,1)**2, &
-      nrj, &
-      Nc_x1+1, &
-      Nc_x2+1, &
-      delta1, &    
-      delta2)
-    nrj = sum(sim%phi3d_seqx1x2(Nc_x1/2,1:Nc_x2,1:Nc_x3)**2)*delta2*delta3
+    nrj=0.0_f64
+!    call sll_s_compute_reduction_2d_to_0d(&
+!      sim%phi3d_seqx1x2(:,:,1)**2, &
+!      nrj, &
+!      Nc_x1+1, &
+!      Nc_x2+1, &
+!      delta1, &    
+!      delta2)
+!    nrj = sum(sim%phi3d_seqx1x2(Nc_x1/2,1:Nc_x2,1:Nc_x3)**2)*delta2*delta3
 
-    mass = 0._f64 
-    nrj2 = 0._f64
-    l2norm=0._f64
-  
-    do i3=1,Nc_x3
-       do i2=1,Nc_x2
-          do i1=1,Nc_x1
-             x1 = x1_min+real(i1-1,f64)*delta1
-!             mass=mass+sim%rho3d_seqx1x2(i1,i2,i3)*x1
-             nrj2=nrj2+(sim%phi3d_seqx1x2(i1,i2,i3)**2)*x1
-             do i4=1,Nc_x4
-                tmp_f4d=sim%f4d_seqx1x2x4(i1,i2,i3,i4)
-                l2norm=l2norm+(tmp_f4d**2)*x1
-                mass=mass+tmp_f4d*x1
-             enddo
-          end do
-       end do
-    end do
-    mass=mass*delta1*delta2*delta3*delta4
-    nrj2=nrj2*delta1*delta2*delta3
-    l2norm=l2norm*delta1*delta2*delta3*delta4
-
+    call compute_mass(sim%layout4d_seqx1x2x4, sim%f4d_seqx1x2x4,x1_min, delta1, Nc_x1, mass, l2norm)
+    mass   = mass*delta1*delta2*delta3*delta4
+    l2norm = l2norm*delta1*delta2*delta3*delta4    
+    if ( prank == 0) print*, 'mass = ', mass, l2norm
+    
+!    l2norm=0._f64
+!    mass=0._f64
+!    do i3=1,Nc_x3+1
+!       do i2=1,Nc_x2
+!          do i1=1,Nc_x1
+!             x1 = x1_min+real(i1-1,f64)*delta1
+!             do i4=1,Nc_x4
+!                tmp_f4d=sim%f4d_seqx1x2x4(i1,i2,i3,i4)
+!                l2norm=l2norm+(tmp_f4d**2)*x1
+!                mass=mass+tmp_f4d*x1
+!             enddo
+!          end do
+!       end do
+!    end do
+!    mass=mass*delta1*delta2*delta3*delta4
+!    l2norm=l2norm*delta1*delta2*delta3*delta4
+!   print *,'mass2-routine',mass,l2norm
+    
     if(sll_f_get_collective_rank(sll_v_world_collective)==0) then
 !      write(file_id,'(f12.5,2g20.12)') &
 !        real(step,f64)*dt, &
@@ -1127,8 +1133,7 @@ contains
          real(step,f64)*dt, &
         nrj, &
         mass, &
-        l2norm, &
-        nrj2
+        l2norm
 
       if(step==0)then    
         ierr = 1
