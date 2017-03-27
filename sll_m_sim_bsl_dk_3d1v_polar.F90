@@ -1961,8 +1961,9 @@ contains
                   
         do iloc2=1, loc3d_sz_x2
           do iloc1=1, loc3d_sz_x1
+            !PN sim%rho3d_seqx1x2(iloc1,iloc2,:)/sim%n0_r(iloc1)-1._f64
             sim%phi3d_seqx1x2(iloc1,iloc2,:) = &
-              sim%rho3d_seqx1x2(iloc1,iloc2,:)/sim%n0_r(iloc1)-1._f64
+              sim%rho3d_seqx1x2(iloc1,iloc2,:) - sim%n0_r(iloc1)
           enddo
         enddo
         do iloc3=1, loc3d_sz_x3
@@ -1974,7 +1975,7 @@ contains
              sim%phi3d_seqx1x2(:,1:loc3d_sz_x2-1,iloc3) )
         enddo
 
-        ! Added to enforce periodic boundary conditions in theta
+        !PN Added to enforce periodic boundary conditions in theta
         sim%phi3d_seqx1x2(:,loc3d_sz_x2,:) = sim%phi3d_seqx1x2(:,1,:)
 
         call sll_o_apply_remap_3d( &
