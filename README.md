@@ -1,4 +1,8 @@
 ## Installation
+
+Follow instructions in https://gitlab.inria.fr/profile/keys
+to add your ssh keys
+
 ### Download
 ```bash
 git clone git@gitlab.inria.fr:ipso/bsl_dk_3d1v_polar.git
