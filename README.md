@@ -3,7 +3,7 @@
 ### Dependencies
    - Fortran compiler
    - openmpi
-   - hdf5 built with openmp
+   - hdf5 built with mpi
    - fftw
    - cmake
 
