@@ -1,4 +1,9 @@
 ## Installation
+### Download
+```bash
+git clone git@gitlab.inria.fr:ipso/bsl_dk_3d1v_polar.git
+cd bsl_dk_3d1v_polar
+```
 
 ### Dependencies
    - Fortran compiler
