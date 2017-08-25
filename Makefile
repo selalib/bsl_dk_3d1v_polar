@@ -17,8 +17,8 @@ selalib:
 	git clone git@gitlab.inria.fr:ipso/selalib.git
 
 sll_build: selalib
-	mkdir -p sll_build
-	cd sll_build; cmake ../selalib -DHDF5_PARALLEL_ENABLED=ON \
+	mkdir -p $@
+	cd $@; cmake ../selalib -DHDF5_PARALLEL_ENABLED=ON \
                   -DCMAKE_INSTALL_PREFIX=${SLL_DIR} \
                   -DCMAKE_BUILD_TYPE=Release \
  	          -DBUILD_TESTING=OFF -DBUILD_SIMULATIONS=OFF; make install
