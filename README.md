@@ -1,10 +1,25 @@
+## Installation
+
+### Dependencies
+   - Fortran compiler
+   - openmpi
+   - hdf5 built with openmp
+   - fftw
+   - cmake
+
+### selalib
+   - http://selalib.gforge.inria.fr/
+   ````bash
+   make sll_build
+   ```
+
 ## Directory structure
 
   - bsl_dk_3d1v_polar         : executable
   - dksim4d_polar_input.nml   : input file
   - dksim4d_polar.gnu         : gnuplot script
   - dksim4d_polar_ref.dat     : reference results
-  - README                    : info (this file)
+  - README.md                 : info (this file)
 
 ## HOWTO
 

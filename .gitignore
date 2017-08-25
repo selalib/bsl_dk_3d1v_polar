@@ -6,6 +6,6 @@ bsl_dk_3d1v_polar
 *.mod
 *.xmf
 
-build/
+sll_build/
 local/
 selalib/

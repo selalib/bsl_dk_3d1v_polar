@@ -1,5 +1,5 @@
 SIM_NAME=bsl_dk_3d1v_polar
-SLL_DIR=./local/
+SLL_DIR=${PWD}/local/
 FC = h5pfc
 FFLAGS = -w -ffree-line-length-none -fall-intrinsics -O3 -fPIC -march=native -I${SLL_DIR}/include/selalib
 FLIBS = -L${SLL_DIR}/lib -lselalib -lfftw3 -ldfftpack
@@ -15,8 +15,10 @@ clean:
 
 selalib:
 	git clone git@gitlab.inria.fr:ipso/selalib.git
-	mkdir -p build
-	cd build; cmake ../selalib -DHDF5_PARALLEL_ENABLED=ON \
+
+sll_build: selalib
+	mkdir -p sll_build
+	cd sll_build; cmake ../selalib -DHDF5_PARALLEL_ENABLED=ON \
                   -DCMAKE_INSTALL_PREFIX=${SLL_DIR} \
                   -DCMAKE_BUILD_TYPE=Release \
  	          -DBUILD_TESTING=OFF -DBUILD_SIMULATIONS=OFF; make install
@@ -28,3 +30,4 @@ selalib:
 
 .mod.o:
 	$(FC) $(FFLAGS) -c $*.F90
+
