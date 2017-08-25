@@ -5,3 +5,7 @@ bsl_dk_3d1v_polar
 *.o
 *.mod
 *.xmf
+
+build/
+local/
+selalib/
