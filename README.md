@@ -1,3 +1,9 @@
+## Build on gpu-irmar
+
+```
+make SLL_DIR=/opt/selalib
+```
+
 ## Installation
 
 Follow instructions in https://gitlab.inria.fr/profile/keys

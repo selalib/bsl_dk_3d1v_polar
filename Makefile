@@ -1,5 +1,5 @@
 SIM_NAME=bsl_dk_3d1v_polar
-SLL_DIR=${PWD}/local/
+SLL_DIR="/opt/selalib"
 FC = h5pfc
 FFLAGS = -w -ffree-line-length-none -fall-intrinsics -O3 -fPIC -march=native -I${SLL_DIR}/include/selalib
 FLIBS = -L${SLL_DIR}/lib -lselalib -lfftw3 -ldfftpack
