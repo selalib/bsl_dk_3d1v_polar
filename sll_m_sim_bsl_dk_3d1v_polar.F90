@@ -68,7 +68,7 @@ module sll_m_sim_bsl_dk_3d1v_polar
 
   use sll_m_cartesian_meshes, only: &
     sll_o_get_node_positions, &
-    sll_f_new_cartesian_mesh_1d, &
+    sll_s_cartesian_mesh_1d_init, &
     sll_t_cartesian_mesh_1d
 
   use sll_m_characteristics_2d_base, only: &
@@ -176,10 +176,6 @@ use sll_m_qn_solver_2d_polar, only: &
   sll_int32, parameter :: SLL_TIME_LOOP_EULER = 0 
   sll_int32, parameter :: SLL_TIME_LOOP_PREDICTOR_CORRECTOR = 1 
 
-
-
-
-  
   type, extends(sll_c_simulation_base_class) :: &
     sll_t_simulation_4d_drift_kinetic_polar
 
@@ -193,10 +189,10 @@ use sll_m_qn_solver_2d_polar, only: &
      sll_int32  :: nproc_x3
      sll_int32  :: nproc_x4 
      ! Mesh parameters
-     type(sll_t_cartesian_mesh_1d), pointer :: m_x1
-     type(sll_t_cartesian_mesh_1d), pointer :: m_x2
-     type(sll_t_cartesian_mesh_1d), pointer :: m_x3
-     type(sll_t_cartesian_mesh_1d), pointer :: m_x4
+     type(sll_t_cartesian_mesh_1d) :: m_x1
+     type(sll_t_cartesian_mesh_1d) :: m_x2
+     type(sll_t_cartesian_mesh_1d) :: m_x3
+     type(sll_t_cartesian_mesh_1d) :: m_x4
      !sll_real64 :: r_min
      !sll_real64 :: r_max
      !sll_real64 :: phi_min
@@ -277,14 +273,10 @@ use sll_m_qn_solver_2d_polar, only: &
     !type(sll_t_cubic_spline_1d), pointer :: interp_x3
     !type(sll_t_cubic_spline_1d), pointer :: interp_x4
 
-    sll_real64, dimension(:), pointer :: x1_node
-    sll_real64, dimension(:), pointer :: x2_node
-    sll_real64, dimension(:), pointer :: x3_node
-    sll_real64, dimension(:), pointer :: x4_node
-
-
-
-
+    sll_real64, dimension(:), allocatable :: x1_node
+    sll_real64, dimension(:), allocatable :: x2_node
+    sll_real64, dimension(:), allocatable :: x3_node
+    sll_real64, dimension(:), allocatable :: x4_node
 
     class(sll_c_advector_2d), pointer :: adv_x1x2
     !class(sll_c_interpolator_2d), pointer :: interp_x1x2
@@ -466,11 +458,10 @@ contains
     close(input_file)
 
     !--> Mesh
-    sim%m_x1 => sll_f_new_cartesian_mesh_1d(num_cells_x1,eta_min=r_min,eta_max=r_max)
-    sim%m_x2 => sll_f_new_cartesian_mesh_1d(num_cells_x2,&
-      eta_min=0._f64,eta_max=2._f64*sll_p_pi)
-    sim%m_x3 => sll_f_new_cartesian_mesh_1d(num_cells_x3,eta_min=z_min,eta_max=z_max)
-    sim%m_x4 => sll_f_new_cartesian_mesh_1d(num_cells_x4,eta_min=v_min,eta_max=v_max)
+    call sll_s_cartesian_mesh_1d_init(sim%m_x1, num_cells_x1,eta_min=r_min,eta_max=r_max)
+    call sll_s_cartesian_mesh_1d_init(sim%m_x2, num_cells_x2,eta_min=0._f64,eta_max=2._f64*sll_p_pi)
+    call sll_s_cartesian_mesh_1d_init(sim%m_x3, num_cells_x3,eta_min=z_min,eta_max=z_max)
+    call sll_s_cartesian_mesh_1d_init(sim%m_x4, num_cells_x4,eta_min=v_min,eta_max=v_max)
     
     !--> Equilibrium
     sim%tau0     = tau0
@@ -483,7 +474,6 @@ contains
     sim%deltarTe = deltarTe
     
     SLL_ALLOCATE(tmp_r(num_cells_x1+1,2),ierr)
-    
     
     select case (poisson2d_BC_rmin)
       case ("SLL_DIRICHLET")
@@ -1164,8 +1154,8 @@ contains
     sll_real64, dimension(:,:), intent(in) :: phi
     sll_real64, dimension(:,:), intent(out) :: A1
     sll_real64, dimension(:,:), intent(out) :: A2
-    type(sll_t_cartesian_mesh_1d), pointer :: mesh1
-    type(sll_t_cartesian_mesh_1d), pointer :: mesh2
+    type(sll_t_cartesian_mesh_1d) :: mesh1
+    type(sll_t_cartesian_mesh_1d) :: mesh2
     class(sll_c_interpolator_2d), pointer   :: interp2d
     sll_int32 :: Nc_x1
     sll_int32 :: Nc_x2
@@ -1205,7 +1195,7 @@ contains
   subroutine compute_field_from_phi_cartesian_1d(phi,mesh,A,interp)
     sll_real64, dimension(:), intent(in) :: phi
     sll_real64, dimension(:), intent(out) :: A
-    type(sll_t_cartesian_mesh_1d), pointer :: mesh
+    type(sll_t_cartesian_mesh_1d) :: mesh
     class(sll_c_interpolator_1d), pointer   :: interp
     sll_int32 :: Nc_x1
     sll_real64 :: x1_min
@@ -1725,7 +1715,7 @@ contains
     sll_int32  :: iloc1, iloc2, iloc3, iloc4
     sll_int32  :: loc4d_sz_x1, loc4d_sz_x2, loc4d_sz_x3, loc4d_sz_x4
     sll_int32, dimension(1:4) :: glob_ind
-    sll_real64, dimension(:), pointer :: x1_node,x2_node,x3_node,x4_node
+    sll_real64, dimension(:), allocatable :: x1_node,x2_node,x3_node,x4_node
     sll_real64 :: rpeak,k_x2,k_x3
     sll_real64 :: tmp_mode,tmp
     sll_real64 :: x1_min,x1_max,mass
@@ -1792,10 +1782,10 @@ contains
       end do
    end do
    print *,'mass-routine init',mass
-    SLL_DEALLOCATE(x1_node,ierr)
-    SLL_DEALLOCATE(x2_node,ierr)
-    SLL_DEALLOCATE(x3_node,ierr)
-    SLL_DEALLOCATE(x4_node,ierr)
+   deallocate(x1_node)
+   deallocate(x2_node)
+   deallocate(x3_node)
+   deallocate(x4_node)
   end subroutine initialize_fdistribu4d_DK
 
 
@@ -2000,8 +1990,8 @@ contains
   subroutine plot_f_polar(iplot,f,m_x1,m_x2)
     sll_int32, intent(in) :: iplot
     sll_real64, dimension(:,:), intent(in) :: f
-    type(sll_t_cartesian_mesh_1d), pointer :: m_x1
-    type(sll_t_cartesian_mesh_1d), pointer :: m_x2
+    type(sll_t_cartesian_mesh_1d) :: m_x1
+    type(sll_t_cartesian_mesh_1d) :: m_x2
 
     sll_int32 :: file_id
     type(sll_t_hdf5_ser_handle)  :: hfile_id
