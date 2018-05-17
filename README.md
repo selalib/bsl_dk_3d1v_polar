@@ -11,7 +11,7 @@ to add your ssh keys
 
 ### Download
 ```bash
-git clone git@gitlab.inria.fr:ipso/bsl_dk_3d1v_polar.git
+git clone git@gitlab.inria.fr:mingus/bsl_dk_3d1v_polar.git
 cd bsl_dk_3d1v_polar
 ```
 
