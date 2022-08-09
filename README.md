@@ -1,9 +1,3 @@
-## Build on gpu-irmar
-
-```
-make SLL_DIR=/opt/selalib
-```
-
 ## Installation
 
 ### Download
@@ -13,6 +7,7 @@ cd bsl_dk_3d1v_polar
 ```
 
 ### Dependencies
+
    - Fortran compiler
    - openmpi
    - hdf5 built with mpi
@@ -20,11 +15,18 @@ cd bsl_dk_3d1v_polar
    - cmake
 
 ### selalib
+
    - http://selalib.github.io
    
    ```bash
-   make sllbuild
+   make sllbuild SLL_DIR=/opt/selalib
    ```
+   
+## Build
+
+```
+make SLL_DIR=/opt/selalib
+```
 
 ## Directory structure
 
