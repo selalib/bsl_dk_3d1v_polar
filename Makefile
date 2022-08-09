@@ -1,8 +1,9 @@
 SIM_NAME = bsl_dk_3d1v_polar
-SLL_DIR ?= "/opt/selalib"
+SLL_DIR ?= /opt/selalib
 FC = h5pfc
 FFLAGS = -w -ffree-line-length-none -fall-intrinsics -O3 -fPIC -march=native -I${SLL_DIR}/include/selalib
-FLIBS = -L${SLL_DIR}/lib -lselalib -lfftw3 -ldfftpack
+FFTWLIB = -lfftw3 # Add -L/usr/local/lib on macos
+FLIBS = -L${SLL_DIR}/lib -lselalib -ldfftpack ${FFTWLIB}
 
 ${SIM_NAME}: reductions.o sll_m_sim_${SIM_NAME}.o ${SIM_NAME}.o 
 	${FC} ${FFLAGS} -o ${SIM_NAME} $^ -I${SLL_DIR}/include/selalib ${FLIBS}
@@ -16,7 +17,7 @@ clean:
 selalib:
 	git clone https://github.com/selalib/selalib
 
-sll_build: selalib
+sllbuild: selalib
 	mkdir -p $@
 	cd $@; cmake ../selalib -DHDF5_PARALLEL_ENABLED=ON \
                   -DCMAKE_INSTALL_PREFIX=${SLL_DIR} \
