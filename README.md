@@ -23,7 +23,7 @@ cd bsl_dk_3d1v_polar
    - http://selalib.github.io
    
    ```bash
-   make sll_build
+   make sllbuild
    ```
 
 ## Directory structure
