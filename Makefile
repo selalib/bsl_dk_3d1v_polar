@@ -1,4 +1,4 @@
-SIM_NAME=bsl_dk_3d1v_polar
+SIM_NAME = bsl_dk_3d1v_polar
 SLL_DIR ?= "/opt/selalib"
 FC = h5pfc
 FFLAGS = -w -ffree-line-length-none -fall-intrinsics -O3 -fPIC -march=native -I${SLL_DIR}/include/selalib
@@ -14,7 +14,7 @@ clean:
 	rm -f *.o ${SIM_NAME} *.mod
 
 selalib:
-	git clone git@gitlab.inria.fr:ipso/selalib.git
+	git clone https://github.com/selalib/selalib
 
 sll_build: selalib
 	mkdir -p $@

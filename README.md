@@ -6,12 +6,9 @@ make SLL_DIR=/opt/selalib
 
 ## Installation
 
-Follow instructions in https://gitlab.inria.fr/profile/keys
-to add your ssh keys
-
 ### Download
 ```bash
-git clone git@gitlab.inria.fr:mingus/bsl_dk_3d1v_polar.git
+git clone https://github.com/selalib/bsl_dk_3d1v_polar
 cd bsl_dk_3d1v_polar
 ```
 
@@ -23,7 +20,7 @@ cd bsl_dk_3d1v_polar
    - cmake
 
 ### selalib
-   - http://selalib.gforge.inria.fr/
+   - http://selalib.github.io
    
    ```bash
    make sll_build
