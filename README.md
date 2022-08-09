@@ -47,6 +47,8 @@ make SLL_DIR=/opt/selalib
   ~~~
        $ gnuplot --persist dksim4d_polar.gnu
   ~~~
+
+![thdiag](thdiag.svg)
   
   3. Run gnuplot scripts generated at runtime
   ~~~

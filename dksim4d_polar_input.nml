@@ -4,10 +4,10 @@
 !gnuplot -persist ../selalib/src/simulation/dksim4d_polar.gnu 
 
 &mesh
-  num_cells_x1 = 128
-  num_cells_x2 = 128
-  num_cells_x3 = 128
-  num_cells_x4 = 128
+  num_cells_x1 = 32
+  num_cells_x2 = 32
+  num_cells_x3 = 32
+  num_cells_x4 = 32
   r_min        = 0.1
   r_max        = 14.5
   z_min        = 0.
@@ -42,7 +42,7 @@
 
 &sim_params
   dt                = 8
-  number_iterations = 1000
+  number_iterations = 10
   freq_diag_time    = 1
   freq_diag         = 1
   !time_loop_case   = "SLL_TIME_LOOP_EULER" 
