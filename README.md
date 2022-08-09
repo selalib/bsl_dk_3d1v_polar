@@ -1,5 +1,20 @@
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/mxnaGG1dfsk/0.jpg)](https://www.youtube.com/watch?v=mxnaGG1dfsk)
 
+Video made with [VisIt](https://visit-dav.github.io/visit-website/releases/)
+
+```
+num_cells_x1 = 128
+num_cells_x2 = 128
+num_cells_x3 = 128
+num_cells_x4 = 128
+```
+
+and
+
+```
+number_iterations = 1000
+```
+
 
 ## Installation
 
